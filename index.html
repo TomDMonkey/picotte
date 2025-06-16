@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Répartition d'argent</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #f4f6f8;
+        color: #333;
+        padding: 20px;
+        max-width: 100%;
+        margin: auto;
+      }
+      h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 1.8em;
+      }
+      .container {
+        background: #ffffff;
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      .form-group {
+        margin-bottom: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      label {
+        font-weight: 500;
+        flex: 1;
+      }
+      input[type="number"] {
+        flex: 1;
+        padding: 6px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+      }
+      button {
+        background: #3498db;
+        color: white;
+        padding: 10px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1em;
+        width: 100%;
+        margin-top: 15px;
+      }
+      button:hover {
+        background: #2980b9;
+      }
+      #totalAmount {
+        font-weight: bold;
+        margin-top: 20px;
+      }
+      .reste {
+        margin-top: 10px;
+        font-style: italic;
+        color: darkred;
+      }
+      .result {
+        margin-top: 20px;
+      }
+      .employee {
+        background: #ecf0f1;
+        padding: 10px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+      }
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        .form-group {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        input[type="number"] {
+          width: 100%;
+          margin-top: 5px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Répartition équitable de l'argent</h1>
+
+    <div class="container">
+      <div class="form-group">
+        <label>Nombre d'employés :</label>
+        <input type="number" id="numEmployees" min="1" value="2" />
+      </div>
+
+      <h3>Billets/pièces disponibles</h3>
+      <div id="currencyInputs"></div>
+
+      <button onclick="distributeMoney()">Répartir</button>
+
+      <div id="totalAmount"></div>
+      <div class="reste" id="reste"></div>
+      <div class="result" id="result"></div>
+    </div>
+
+    <script>
+      const denominations = [50, 20, 10, 5, 2, 1];
+
+      const currencyInputs = document.getElementById("currencyInputs");
+      denominations.forEach((denom) => {
+        const div = document.createElement("div");
+        div.className = "form-group";
+        div.innerHTML = `<label>${denom}€ :</label><input type="number" min="0" value="0" id="bill_${denom}">`;
+        currencyInputs.appendChild(div);
+      });
+
+      function distributeMoney() {
+        const numEmployees = parseInt(
+          document.getElementById("numEmployees").value
+        );
+        const bills = [];
+
+        denominations.forEach((denom) => {
+          const count = parseInt(
+            document.getElementById(`bill_${denom}`).value
+          );
+          for (let i = 0; i < count; i++) {
+            bills.push(denom);
+          }
+        });
+
+        const totalSum = bills.reduce((acc, val) => acc + val, 0);
+        const share = Math.floor(totalSum / numEmployees);
+        const remaining = totalSum % numEmployees;
+
+        document.getElementById(
+          "totalAmount"
+        ).innerText = `Montant total à répartir : ${totalSum}€ (soit ${share}€ par employé)`;
+        document.getElementById(
+          "reste"
+        ).innerText = `Reste non distribuable : ${remaining}€`;
+
+        bills.sort((a, b) => b - a);
+
+        const employees = Array.from({ length: numEmployees }, () => ({
+          total: 0,
+          billets: [],
+        }));
+
+        for (const bill of bills) {
+          const eligible = employees.filter((emp) => emp.total + bill <= share);
+
+          if (eligible.length > 0) {
+            eligible.sort((a, b) => a.total - b.total);
+            eligible[0].billets.push(bill);
+            eligible[0].total += bill;
+          }
+        }
+
+        const resultDiv = document.getElementById("result");
+        resultDiv.innerHTML = "";
+        employees.forEach((emp, index) => {
+          const empDiv = document.createElement("div");
+          empDiv.className = "employee";
+          empDiv.innerHTML = `<strong>Employé ${index + 1}</strong> : ${
+            emp.total
+          }€<br>Billets/pièces : [${emp.billets.join(", ")}]`;
+          resultDiv.appendChild(empDiv);
+        });
+      }
+    </script>
+  </body>
+</html>
