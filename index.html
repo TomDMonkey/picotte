@@ -2,7 +2,6 @@
 <html lang="fr">
   <head>
     <link rel="icon" type="image/png" href="pic.jpg" />
-
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>picotte</title>
@@ -21,12 +20,11 @@
         font-size: 1.8em;
       }
       h3 {
-        margin-top: 10px; /* réduit l'espace au dessus */
-        margin-bottom: 5px; /* réduit l'espace en dessous */
+        margin-top: 10px;
+        margin-bottom: 5px;
       }
-
       .form-group {
-        margin-bottom: 6px; /* diminue un peu la marge sous les champs */
+        margin-bottom: 6px;
       }
       .container {
         background: #ffffff;
@@ -119,13 +117,14 @@
     </div>
 
     <script>
-      const denominations = [50, 20, 10, 5, 2, 1];
+      // Ajout de la pièce de 0.5 €
+      const denominations = [50, 20, 10, 5, 2, 1, 0.5];
 
       const currencyInputs = document.getElementById("currencyInputs");
       denominations.forEach((denom) => {
         const div = document.createElement("div");
         div.className = "form-group";
-        div.innerHTML = `<label>${denom}€ :</label><input type="number" min="0" value="0" id="bill_${denom}">`;
+        div.innerHTML = `<label>${denom}€ :</label><input type="number" min="0" step="1" value="0" id="bill_${denom}">`;
         currencyInputs.appendChild(div);
       });
 
@@ -145,15 +144,18 @@
         });
 
         const totalSum = bills.reduce((acc, val) => acc + val, 0);
-        const share = Math.floor(totalSum / numEmployees);
-        const remaining = totalSum % numEmployees;
+        const share = Math.floor((totalSum / numEmployees) * 100) / 100;
+        const remaining =
+          Math.round((totalSum - share * numEmployees) * 100) / 100;
 
         document.getElementById(
           "totalAmount"
-        ).innerText = `Montant total à répartir : ${totalSum}€ (soit ${share}€ par employé)`;
+        ).innerText = `Montant total à répartir : ${totalSum.toFixed(
+          2
+        )}€ (soit ${share.toFixed(2)}€ par employé)`;
         document.getElementById(
           "reste"
-        ).innerText = `Reste non distribuable : ${remaining}€`;
+        ).innerText = `Reste non distribuable : ${remaining.toFixed(2)}€`;
 
         bills.sort((a, b) => b - a);
 
@@ -177,9 +179,11 @@
         employees.forEach((emp, index) => {
           const empDiv = document.createElement("div");
           empDiv.className = "employee";
-          empDiv.innerHTML = `<strong>Employé ${index + 1}</strong> : ${
-            emp.total
-          }€<br>Billets/pièces : [${emp.billets.join(", ")}]`;
+          empDiv.innerHTML = `<strong>Employé ${
+            index + 1
+          }</strong> : ${emp.total.toFixed(
+            2
+          )}€<br>Billets/pièces : [${emp.billets.join(", ")}]`;
           resultDiv.appendChild(empDiv);
         });
       }
